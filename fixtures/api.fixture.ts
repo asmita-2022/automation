@@ -1,4 +1,4 @@
-import { test as base } from '@playwright/test';
+import { test as base, expect, request } from '@playwright/test';
 
 import { ApiClient } from '../api/client';
 import { AuthService } from '../api/services/auth.service';
@@ -21,8 +21,12 @@ interface ApiFixtures {
 }
 
 export const test = base.extend<ApiFixtures>({
-  branchService: async ({ request }, use) => {
-    const apiClient = new ApiClient(request);
+  branchService: async ({}, use) => {
+  const apiContext = await request.newContext({
+    baseURL: process.env.API_BASE_URL,
+  });
+
+  const apiClient = new ApiClient(apiContext);
 
     const authService = new AuthService(apiClient);
 
@@ -32,6 +36,7 @@ export const test = base.extend<ApiFixtures>({
     await authService.login(email, password);
 
     await use(new BranchService(apiClient));
+    await apiContext.dispose();
   },
 
   branchPayload: async ({}, use) => {
