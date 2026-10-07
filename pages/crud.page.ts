@@ -195,25 +195,7 @@ await this.locators.adminPhoneInput.type(adminPhone, {
 
     await this.locators.saveChangesButton.click();
 
-console.log('After Save URL:', this.page.url());
-console.log('After Save Title:', await this.page.title());
-
-await this.page.waitForTimeout(3000);
-
-console.log(
-  'Search input count:',
-  await this.locators.searchInput.count()
-);
-
-console.log(
-  'Search input visible:',
-  await this.locators.searchInput.isVisible().catch(() => false)
-);
-
-console.log(
-  'Current URL after wait:',
-  this.page.url()
-);
+    await this.page.waitForTimeout(6000);
   }
 
   async searchBranch(name: string) {

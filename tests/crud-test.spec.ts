@@ -230,12 +230,10 @@ test.describe('CRUD Operations Assignment Testing Suite', () => {
     await confirmButton.click();
 
     // Wait for Search to remain available
-    console.log('CREATE TEST URL:', page.url());
-
-await crudPage.locators.searchInput.waitFor({
-  state: 'visible',
-  timeout: 30000,
-});
+    await crudPage.locators.searchInput.waitFor({
+      state: 'visible',
+      timeout: 30000,
+    });
 
     // Search deleted branch
     await crudPage.searchBranch(
