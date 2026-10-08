@@ -20,7 +20,7 @@ export const generateBranchPayload = (): BranchPayload => {
     email: `qa.api.branch.${suffix}@example.com`,
     phone: generatePhoneNumber(),
     address: 'Shankhamul, Kathmandu, Nepal',
-    status: 'Active',
+    status: 'active',
 
     branch_admin: {
       first_name: 'Qa',
@@ -42,6 +42,6 @@ export const generateBranchUpdatePayload =
       email: `qa.api.branch.updated.${suffix}@example.com`,
       phone: generatePhoneNumber(),
       address: 'Jawalakhel, Lalitpur, Nepal',
-      status: 'Active',
+      status: 'active',
     };
   };

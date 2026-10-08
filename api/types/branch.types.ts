@@ -1,11 +1,11 @@
-export type BranchStatus = 'Active' | 'Inactive';
+export type BranchStatus = 'active' | 'inactive';
 
 export interface BranchAdminPayload {
   email: string;
   username: string;
   first_name: string;
   last_name: string;
-  password?: string;
+  password: string;
   phone: string;
 }
 

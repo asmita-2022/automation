@@ -1,5 +1,4 @@
-import { test as base } from '@playwright/test';
-
+import { test as base, expect } from '@playwright/test';
 import { ApiClient } from '../api/client';
 import { AuthService } from '../api/services/auth.service';
 import { BranchService } from '../api/services/branch.service';
@@ -15,15 +14,24 @@ import {
 } from '../api/types/branch.types';
 
 interface ApiFixtures {
+  apiClient: ApiClient;
   branchService: BranchService;
   branchPayload: BranchPayload;
   branchUpdatePayload: BranchUpdatePayload;
 }
 
 export const test = base.extend<ApiFixtures>({
-  branchService: async ({ request }, use) => {
-    const apiClient = new ApiClient(request);
+  apiClient: async ({ playwright }, use) => {
+    const apiContext = await playwright.request.newContext({
+      baseURL: process.env.API_BASE_URL,
+    });
 
+    await use(new ApiClient(apiContext));
+
+    await apiContext.dispose();
+  },
+
+  branchService: async ({ apiClient }, use) => {
     const authService = new AuthService(apiClient);
 
     const email = process.env.ORG_ADMIN_EMAIL as string;

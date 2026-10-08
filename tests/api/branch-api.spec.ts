@@ -5,68 +5,104 @@ test.describe('Branch API CRUD Tests', () => {
     branchService,
     branchPayload,
   }) => {
-    const createdBranch =
-      await branchService.createBranch(branchPayload);
+    let createdBranchSlug: string | undefined;
 
-    expect(createdBranch).toBeDefined();
-    expect(createdBranch.id).toBeGreaterThan(0);
+    try {
+      const createdBranch =
+        await branchService.createBranch(branchPayload);
 
-    expect(createdBranch.name).toBe(
-      branchPayload.name
-    );
+      createdBranchSlug = createdBranch.slug;
 
-    expect(createdBranch.slug).toBe(
-      branchPayload.slug
-    );
+      expect(createdBranch).toBeDefined();
+      expect(createdBranch.id).toBeGreaterThan(0);
 
-    expect(createdBranch.email).toBe(
-      branchPayload.email
-    );
+      expect(createdBranch.name).toBe(
+        branchPayload.name
+      );
 
-    expect(createdBranch.phone).toBe(
-      branchPayload.phone
-    );
+      expect(createdBranch.slug).toBe(
+        branchPayload.slug
+      );
 
-    expect(createdBranch.address).toBe(
-      branchPayload.address
-    );
+      expect(createdBranch.email).toBe(
+        branchPayload.email
+      );
 
-    expect(createdBranch.status).toBe(
-      branchPayload.status
-    );
+      expect(createdBranch.phone).toBe(
+        branchPayload.phone
+      );
 
-    expect(createdBranch.admin).toBeDefined();
+      expect(createdBranch.address).toBe(
+        branchPayload.address
+      );
+
+      expect(createdBranch.status).toBe(
+        branchPayload.status
+      );
+
+      expect(createdBranch.admin).toBeDefined();
+    } finally {
+      if (createdBranchSlug) {
+        await branchService.deleteBranch(
+          createdBranchSlug
+        );
+      }
+    }
   });
 
   test('READ BRANCH', async ({
     branchService,
     branchPayload,
   }) => {
-    const createdBranch =
-      await branchService.createBranch(branchPayload);
+    let createdBranchSlug: string | undefined;
 
-    const branch =
-      await branchService.getBranch(createdBranch.slug);
+    try {
+      const createdBranch =
+        await branchService.createBranch(branchPayload);
 
-    expect(branch.id).toBe(
-      createdBranch.id
-    );
+      createdBranchSlug = createdBranch.slug;
 
-    expect(branch.name).toBe(
-      branchPayload.name
-    );
+      const branch =
+        await branchService.getBranch(
+          createdBranch.slug
+        );
 
-    expect(branch.slug).toBe(
-      branchPayload.slug
-    );
+      expect(branch).toBeDefined();
 
-    expect(branch.email).toBe(
-      branchPayload.email
-    );
+      expect(branch.id).toBe(
+        createdBranch.id
+      );
 
-    expect(branch.address).toBe(
-      branchPayload.address
-    );
+      expect(branch.name).toBe(
+        branchPayload.name
+      );
+
+      expect(branch.slug).toBe(
+        branchPayload.slug
+      );
+
+      expect(branch.email).toBe(
+        branchPayload.email
+      );
+
+      expect(branch.phone).toBe(
+        branchPayload.phone
+      );
+
+      expect(branch.address).toBe(
+        branchPayload.address
+      );
+
+      expect(branch.status).toBe(
+        branchPayload.status
+      );
+    } finally {
+      if (createdBranchSlug) {
+        await branchService.deleteBranch(
+          createdBranchSlug
+        );
+      }
+    }
   });
 
   test('UPDATE BRANCH', async ({
@@ -74,38 +110,54 @@ test.describe('Branch API CRUD Tests', () => {
     branchPayload,
     branchUpdatePayload,
   }) => {
-    const createdBranch =
-      await branchService.createBranch(branchPayload);
+    let createdBranchSlug: string | undefined;
 
-    const updatedBranch =
-      await branchService.updateBranch(
-        createdBranch.slug,
-        branchUpdatePayload
+    try {
+      const createdBranch =
+        await branchService.createBranch(
+          branchPayload
+        );
+
+      createdBranchSlug = createdBranch.slug;
+
+      const updatedBranch =
+        await branchService.updateBranch(
+          createdBranch.slug,
+          branchUpdatePayload
+        );
+
+      expect(updatedBranch).toBeDefined();
+
+      expect(updatedBranch.id).toBe(
+        createdBranch.id
       );
 
-    expect(updatedBranch.id).toBe(
-      createdBranch.id
-    );
+      expect(updatedBranch.name).toBe(
+        branchUpdatePayload.name
+      );
 
-    expect(updatedBranch.name).toBe(
-      branchUpdatePayload.name
-    );
+      expect(updatedBranch.email).toBe(
+        branchUpdatePayload.email
+      );
 
-    expect(updatedBranch.email).toBe(
-      branchUpdatePayload.email
-    );
+      expect(updatedBranch.phone).toBe(
+        branchUpdatePayload.phone
+      );
 
-    expect(updatedBranch.phone).toBe(
-      branchUpdatePayload.phone
-    );
+      expect(updatedBranch.address).toBe(
+        branchUpdatePayload.address
+      );
 
-    expect(updatedBranch.address).toBe(
-      branchUpdatePayload.address
-    );
-
-    expect(updatedBranch.status).toBe(
-      branchUpdatePayload.status
-    );
+      expect(updatedBranch.status).toBe(
+        branchUpdatePayload.status
+      );
+    } finally {
+      if (createdBranchSlug) {
+        await branchService.deleteBranch(
+          createdBranchSlug
+        );
+      }
+    }
   });
 
   test('DELETE BRANCH', async ({
@@ -113,14 +165,21 @@ test.describe('Branch API CRUD Tests', () => {
     branchPayload,
   }) => {
     const createdBranch =
-      await branchService.createBranch(branchPayload);
+      await branchService.createBranch(
+        branchPayload
+      );
+
+    expect(createdBranch).toBeDefined();
+    expect(createdBranch.id).toBeGreaterThan(0);
 
     await branchService.deleteBranch(
       createdBranch.slug
     );
 
     await expect(
-      branchService.getBranch(createdBranch.slug)
+      branchService.getBranch(
+        createdBranch.slug
+      )
     ).rejects.toThrow();
   });
 
@@ -131,8 +190,14 @@ test.describe('Branch API CRUD Tests', () => {
       await branchService.listBranches();
 
     expect(branches).toBeDefined();
-    expect(branches.count).toBeGreaterThanOrEqual(0);
-    expect(Array.isArray(branches.results)).toBe(true);
+
+    expect(
+      branches.count
+    ).toBeGreaterThanOrEqual(0);
+
+    expect(
+      Array.isArray(branches.results)
+    ).toBe(true);
   });
 
   test('NEGATIVE - GET NON-EXISTING BRANCH', async ({
@@ -142,7 +207,9 @@ test.describe('Branch API CRUD Tests', () => {
       `branch-that-does-not-exist-${Date.now()}`;
 
     await expect(
-      branchService.getBranch(nonExistingSlug)
+      branchService.getBranch(
+        nonExistingSlug
+      )
     ).rejects.toThrow();
   });
 });

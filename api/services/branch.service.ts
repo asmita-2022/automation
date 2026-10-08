@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { ApiClient } from './../client';
+import { ApiClient } from '../client';
 
 import {
   Branch,
@@ -18,12 +18,18 @@ export class BranchService {
       payload
     );
 
+    const body = await response.json();
+
+    console.log('CREATE STATUS:', response.status());
+    console.log(
+      'CREATE RESPONSE:',
+      JSON.stringify(body, null, 2)
+    );
+
     expect(
       response.status(),
       'Create branch should return 201'
     ).toBe(201);
-
-    const body = await response.json();
 
     return body.data;
   }
@@ -65,7 +71,10 @@ export class BranchService {
   ): Promise<Branch> {
     const response = await this.apiClient.put(
       `branch/branches/${slug}/`,
-      payload
+      {
+        ...payload,
+        slug,
+      }
     );
 
     expect(
