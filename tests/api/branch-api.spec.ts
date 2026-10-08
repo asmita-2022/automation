@@ -1,6 +1,7 @@
 import { test, expect } from '../../fixtures/api.fixture';
 
 test.describe('Branch API CRUD Tests', () => {
+
   test('CREATE BRANCH', async ({
     branchService,
     branchPayload,
@@ -9,9 +10,12 @@ test.describe('Branch API CRUD Tests', () => {
 
     try {
       const createdBranch =
-        await branchService.createBranch(branchPayload);
+        await branchService.createBranch(
+          branchPayload
+        );
 
-      createdBranchSlug = createdBranch.slug;
+      createdBranchSlug =
+        createdBranch.slug;
 
       expect(createdBranch).toBeDefined();
       expect(createdBranch.id).toBeGreaterThan(0);
@@ -41,6 +45,7 @@ test.describe('Branch API CRUD Tests', () => {
       );
 
       expect(createdBranch.admin).toBeDefined();
+
     } finally {
       if (createdBranchSlug) {
         await branchService.deleteBranch(
@@ -50,6 +55,7 @@ test.describe('Branch API CRUD Tests', () => {
     }
   });
 
+
   test('READ BRANCH', async ({
     branchService,
     branchPayload,
@@ -58,9 +64,12 @@ test.describe('Branch API CRUD Tests', () => {
 
     try {
       const createdBranch =
-        await branchService.createBranch(branchPayload);
+        await branchService.createBranch(
+          branchPayload
+        );
 
-      createdBranchSlug = createdBranch.slug;
+      createdBranchSlug =
+        createdBranch.slug;
 
       const branch =
         await branchService.getBranch(
@@ -96,6 +105,7 @@ test.describe('Branch API CRUD Tests', () => {
       expect(branch.status).toBe(
         branchPayload.status
       );
+
     } finally {
       if (createdBranchSlug) {
         await branchService.deleteBranch(
@@ -104,6 +114,7 @@ test.describe('Branch API CRUD Tests', () => {
       }
     }
   });
+
 
   test('UPDATE BRANCH', async ({
     branchService,
@@ -118,7 +129,8 @@ test.describe('Branch API CRUD Tests', () => {
           branchPayload
         );
 
-      createdBranchSlug = createdBranch.slug;
+      createdBranchSlug =
+        createdBranch.slug;
 
       const updatedBranch =
         await branchService.updateBranch(
@@ -151,6 +163,7 @@ test.describe('Branch API CRUD Tests', () => {
       expect(updatedBranch.status).toBe(
         branchUpdatePayload.status
       );
+
     } finally {
       if (createdBranchSlug) {
         await branchService.deleteBranch(
@@ -160,28 +173,50 @@ test.describe('Branch API CRUD Tests', () => {
     }
   });
 
+
   test('DELETE BRANCH', async ({
     branchService,
     branchPayload,
   }) => {
-    const createdBranch =
-      await branchService.createBranch(
-        branchPayload
+    let createdBranchSlug: string | undefined;
+
+    try {
+      const createdBranch =
+        await branchService.createBranch(
+          branchPayload
+        );
+
+      createdBranchSlug =
+        createdBranch.slug;
+
+      expect(createdBranch).toBeDefined();
+      expect(createdBranch.id).toBeGreaterThan(0);
+
+      await branchService.deleteBranch(
+        createdBranch.slug
       );
 
-    expect(createdBranch).toBeDefined();
-    expect(createdBranch.id).toBeGreaterThan(0);
+      await expect(
+        branchService.getBranch(
+          createdBranch.slug
+        )
+      ).rejects.toThrow();
 
-    await branchService.deleteBranch(
-      createdBranch.slug
-    );
+      createdBranchSlug = undefined;
 
-    await expect(
-      branchService.getBranch(
-        createdBranch.slug
-      )
-    ).rejects.toThrow();
+    } finally {
+      if (createdBranchSlug) {
+        try {
+          await branchService.deleteBranch(
+            createdBranchSlug
+          );
+        } catch {
+          // Branch may already have been deleted.
+        }
+      }
+    }
   });
+
 
   test('LIST BRANCHES', async ({
     branchService,
@@ -200,16 +235,21 @@ test.describe('Branch API CRUD Tests', () => {
     ).toBe(true);
   });
 
-  test('NEGATIVE - GET NON-EXISTING BRANCH', async ({
-    branchService,
-  }) => {
-    const nonExistingSlug =
-      `branch-that-does-not-exist-${Date.now()}`;
 
-    await expect(
-      branchService.getBranch(
-        nonExistingSlug
-      )
-    ).rejects.toThrow();
-  });
+  test(
+    'NEGATIVE - GET NON-EXISTING BRANCH',
+    async ({
+      branchService,
+    }) => {
+      const nonExistingSlug =
+        `branch-that-does-not-exist-${Date.now()}`;
+
+      await expect(
+        branchService.getBranch(
+          nonExistingSlug
+        )
+      ).rejects.toThrow();
+    }
+  );
+
 });

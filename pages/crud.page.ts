@@ -16,7 +16,6 @@ export class CrudPage {
     phoneInput: Locator;
     statusDropdown: Locator;
     activeOption: Locator;
-    inactiveOption: Locator;
     firstNameInput: Locator;
     lastNameInput: Locator;
     adminEmailInput: Locator;
@@ -30,9 +29,12 @@ export class CrudPage {
     this.page = page;
 
     this.locators = {
-      addBranchButton: page.getByRole('button', {
-        name: 'Add Branch',
-      }),
+      addBranchButton: page.getByRole(
+        'button',
+        {
+          name: 'Add Branch',
+        }
+      ),
 
       branchNameInput: page.getByLabel(
         'Branch Name*'
@@ -62,14 +64,6 @@ export class CrudPage {
         'option',
         {
           name: 'Active',
-          exact: true,
-        }
-      ),
-
-      inactiveOption: page.getByRole(
-        'option',
-        {
-          name: 'Inactive',
           exact: true,
         }
       ),
@@ -108,10 +102,6 @@ export class CrudPage {
     };
   }
 
-  // =======================================================
-  // OPEN APPLICATION
-  // =======================================================
-
   async goto(): Promise<void> {
     await this.page.goto(
       'https://qa03.stage.chairlyo.com/',
@@ -120,10 +110,6 @@ export class CrudPage {
       }
     );
   }
-
-  // =======================================================
-  // CREATE BRANCH
-  // =======================================================
 
   async createBranch(
     name: string,
@@ -135,13 +121,6 @@ export class CrudPage {
     lName: string,
     adminPhone: string
   ): Promise<void> {
-    console.log(
-      'Opening Add Branch...'
-    );
-
-    // -----------------------------------------------------
-    // Open Add Branch
-    // -----------------------------------------------------
 
     await this.locators.addBranchButton
       .first()
@@ -160,10 +139,6 @@ export class CrudPage {
         timeout: 30000,
       });
 
-    // -----------------------------------------------------
-    // Branch information
-    // -----------------------------------------------------
-
     await this.locators.branchNameInput.fill(
       name
     );
@@ -180,10 +155,6 @@ export class CrudPage {
       address
     );
 
-    // -----------------------------------------------------
-    // Branch phone
-    // -----------------------------------------------------
-
     await this.locators.phoneInput.click();
 
     await this.locators.phoneInput.press(
@@ -197,10 +168,6 @@ export class CrudPage {
       }
     );
 
-    // -----------------------------------------------------
-    // Status
-    // -----------------------------------------------------
-
     await this.locators.statusDropdown.click();
 
     await this.locators.activeOption.waitFor({
@@ -209,10 +176,6 @@ export class CrudPage {
     });
 
     await this.locators.activeOption.click();
-
-    // -----------------------------------------------------
-    // Branch admin
-    // -----------------------------------------------------
 
     await this.locators.firstNameInput.fill(
       fName
@@ -230,10 +193,6 @@ export class CrudPage {
       'Paramparaaaa@123'
     );
 
-    // -----------------------------------------------------
-    // Admin phone
-    // -----------------------------------------------------
-
     await this.locators.adminPhoneInput.click();
 
     await this.locators.adminPhoneInput.press(
@@ -247,20 +206,6 @@ export class CrudPage {
       }
     );
 
-    console.log(
-      'Branch phone:',
-      await this.locators.phoneInput.inputValue()
-    );
-
-    console.log(
-      'Admin phone:',
-      await this.locators.adminPhoneInput.inputValue()
-    );
-
-    // -----------------------------------------------------
-    // Save
-    // -----------------------------------------------------
-
     await this.locators.saveChangesButton.waitFor({
       state: 'visible',
       timeout: 15000,
@@ -271,14 +216,6 @@ export class CrudPage {
     ).toBeEnabled({
       timeout: 15000,
     });
-
-    console.log(
-      'Clicking Save Changes...'
-    );
-
-    // -----------------------------------------------------
-    // Wait for CREATE request
-    // -----------------------------------------------------
 
     const createResponsePromise =
       this.page.waitForResponse(
@@ -297,29 +234,10 @@ export class CrudPage {
     const createResponse =
       await createResponsePromise;
 
-    console.log(
-      'CREATE REQUEST METHOD:',
-      createResponse.request().method()
-    );
-
-    console.log(
-      'CREATE REQUEST URL:',
-      createResponse.url()
-    );
-
-    console.log(
-      'CREATE RESPONSE STATUS:',
-      createResponse.status()
-    );
-
     expect(
       createResponse.ok(),
       'Create branch API request should succeed'
     ).toBeTruthy();
-
-    // -----------------------------------------------------
-    // Return to branch list
-    // -----------------------------------------------------
 
     await this.page.goto(
       'https://qa03.stage.chairlyo.com/',
@@ -332,19 +250,12 @@ export class CrudPage {
       state: 'visible',
       timeout: 30000,
     });
-
-    console.log(
-      'Branch list loaded after creation.'
-    );
   }
-
-  // =======================================================
-  // SEARCH BRANCH
-  // =======================================================
 
   async searchBranch(
     name: string
   ): Promise<void> {
+
     await this.locators.searchInput.waitFor({
       state: 'visible',
       timeout: 30000,
@@ -363,10 +274,6 @@ export class CrudPage {
     await this.page.waitForTimeout(2000);
   }
 
-  // =======================================================
-  // GET BRANCH ROW
-  // =======================================================
-
   getBranchRow(
     branchName: string
   ): Locator {
@@ -378,14 +285,11 @@ export class CrudPage {
       .first();
   }
 
-  // =======================================================
-  // OPEN EDIT BRANCH
-  // =======================================================
-
   async openEditBranch(
     branchName: string,
     slug: string
   ): Promise<void> {
+
     const branchRow =
       this.getBranchRow(branchName);
 
@@ -396,19 +300,18 @@ export class CrudPage {
     });
 
     const editLink =
-      branchRow.getByRole('link', {
-        name: 'Edit branch',
-      });
+      branchRow.getByRole(
+        'link',
+        {
+          name: 'Edit branch',
+        }
+      );
 
     await expect(
       editLink
     ).toBeVisible({
       timeout: 10000,
     });
-
-    // -----------------------------------------------------
-    // Wait for branch GET request
-    // -----------------------------------------------------
 
     const branchResponsePromise =
       this.page.waitForResponse(
@@ -425,45 +328,25 @@ export class CrudPage {
 
     await branchResponsePromise;
 
-    console.log(
-      'Branch GET response received.'
-    );
-
-    // -----------------------------------------------------
-    // Wait for edit page
-    // -----------------------------------------------------
-
     await this.locators.slugInput.waitFor({
       state: 'visible',
       timeout: 30000,
     });
 
-    // -----------------------------------------------------
-    // Wait for React to populate form
-    // -----------------------------------------------------
-
     await expect(
       this.locators.slugInput
-    ).toHaveValue(slug, {
-      timeout: 30000,
-    });
-
-    console.log(
-      'Edit branch page loaded.'
+    ).toHaveValue(
+      slug,
+      {
+        timeout: 30000,
+      }
     );
   }
-
-  // =======================================================
-  // UPDATE BRANCH NAME
-  // =======================================================
 
   async updateBranchName(
     updatedName: string,
     slug: string
   ): Promise<void> {
-    // -----------------------------------------------------
-    // Fill updated name
-    // -----------------------------------------------------
 
     await expect(
       this.locators.branchNameInput
@@ -477,15 +360,9 @@ export class CrudPage {
 
     await expect(
       this.locators.branchNameInput
-    ).toHaveValue(updatedName);
-
-    console.log(
-      'Updated branch name entered.'
+    ).toHaveValue(
+      updatedName
     );
-
-    // -----------------------------------------------------
-    // Verify Save Changes button
-    // -----------------------------------------------------
 
     await expect(
       this.locators.saveChangesButton
@@ -498,14 +375,6 @@ export class CrudPage {
     ).toBeEnabled({
       timeout: 15000,
     });
-
-    console.log(
-      'Save Changes button is visible and enabled.'
-    );
-
-    // -----------------------------------------------------
-    // Wait for PATCH request
-    // -----------------------------------------------------
 
     const updateRequestPromise =
       this.page.waitForRequest(
@@ -527,21 +396,9 @@ export class CrudPage {
           response.status() === 200
       );
 
-    // -----------------------------------------------------
-    // Click Save Changes
-    // -----------------------------------------------------
-
-    console.log(
-      'Clicking Save Changes for update...'
-    );
-
     await this.locators.saveChangesButton.click({
       timeout: 15000,
     });
-
-    // -----------------------------------------------------
-    // Wait for PATCH request and response
-    // -----------------------------------------------------
 
     const [
       updateRequest,
@@ -551,24 +408,13 @@ export class CrudPage {
       updateResponsePromise,
     ]);
 
-    console.log(
-      'UPDATE REQUEST METHOD:',
+    expect(
       updateRequest.method()
-    );
+    ).toBe('PATCH');
 
-    console.log(
-      'UPDATE REQUEST URL:',
-      updateRequest.url()
-    );
-
-    console.log(
-      'UPDATE RESPONSE STATUS:',
+    expect(
       updateResponse.status()
-    );
-
-    // -----------------------------------------------------
-    // Verify updated name
-    // -----------------------------------------------------
+    ).toBe(200);
 
     await expect(
       this.page.locator('body')
@@ -578,46 +424,20 @@ export class CrudPage {
         timeout: 30000,
       }
     );
-
-    console.log(
-      'UPDATED BRANCH NAME VERIFIED.'
-    );
   }
-
-  // =======================================================
-  // DELETE BRANCH FROM UI
-  // =======================================================
 
   async deleteBranchFromUI(
     branchName: string
   ): Promise<void> {
+
     const branchRow =
       this.getBranchRow(branchName);
-
-    // -----------------------------------------------------
-    // Verify branch row
-    // -----------------------------------------------------
 
     await expect(
       branchRow
     ).toBeVisible({
       timeout: 15000,
     });
-
-    // -----------------------------------------------------
-    // Find actual delete action
-    // -----------------------------------------------------
-    //
-    // The page has:
-    //
-    // <span class="sr-only">
-    //   Delete branch
-    // </span>
-    //
-    // and the actual trash SVG.
-    //
-    // We click the parent of the trash SVG.
-    // -----------------------------------------------------
 
     const deleteAction =
       branchRow
@@ -632,25 +452,9 @@ export class CrudPage {
       timeout: 10000,
     });
 
-    console.log(
-      'Delete action found.'
-    );
-
-    // -----------------------------------------------------
-    // Click delete action
-    // -----------------------------------------------------
-
     await deleteAction.click({
       timeout: 15000,
     });
-
-    console.log(
-      'Delete action clicked.'
-    );
-
-    // -----------------------------------------------------
-    // EXACT Delete Branch button
-    // -----------------------------------------------------
 
     const confirmButton =
       this.page.getByRole(
@@ -667,14 +471,6 @@ export class CrudPage {
       timeout: 10000,
     });
 
-    console.log(
-      'Delete Branch confirmation button found.'
-    );
-
-    // -----------------------------------------------------
-    // Check for confirmation checkbox
-    // -----------------------------------------------------
-
     const checkboxes =
       this.page.locator(
         'input[type="checkbox"]'
@@ -688,26 +484,17 @@ export class CrudPage {
         checkboxes.last();
 
       if (
-        await lastCheckbox.isVisible()
+        await lastCheckbox.isVisible() &&
+        !(await lastCheckbox.isChecked())
       ) {
-        console.log(
-          'Confirmation checkbox found.'
-        );
-
-        if (
-          !(await lastCheckbox.isChecked())
-        ) {
-          await lastCheckbox.check();
-        }
+        await lastCheckbox.check();
       }
     }
 
-    // -----------------------------------------------------
-    // Check for confirmation textbox
-    // -----------------------------------------------------
-
     const textboxes =
-      this.page.getByRole('textbox');
+      this.page.getByRole(
+        'textbox'
+      );
 
     const textboxCount =
       await textboxes.count();
@@ -723,10 +510,6 @@ export class CrudPage {
           await lastTextbox.inputValue();
 
         if (!value) {
-          console.log(
-            'Confirmation textbox found.'
-          );
-
           await lastTextbox.fill(
             'Delete Branch'
           );
@@ -734,23 +517,11 @@ export class CrudPage {
       }
     }
 
-    // -----------------------------------------------------
-    // Wait for Delete Branch to become enabled
-    // -----------------------------------------------------
-
     await expect(
       confirmButton
     ).toBeEnabled({
       timeout: 10000,
     });
-
-    console.log(
-      'Delete Branch button is enabled.'
-    );
-
-    // -----------------------------------------------------
-    // Wait for DELETE API request
-    // -----------------------------------------------------
 
     const deleteResponsePromise =
       this.page.waitForResponse(
@@ -764,53 +535,22 @@ export class CrudPage {
           response.status() < 300
       );
 
-    // -----------------------------------------------------
-    // Click Delete Branch
-    // -----------------------------------------------------
-
     await confirmButton.click({
       timeout: 15000,
     });
 
-    console.log(
-      'Delete Branch clicked.'
-    );
-
     const deleteResponse =
       await deleteResponsePromise;
-
-    console.log(
-      'DELETE REQUEST METHOD:',
-      deleteResponse.request().method()
-    );
-
-    console.log(
-      'DELETE REQUEST URL:',
-      deleteResponse.url()
-    );
-
-    console.log(
-      'DELETE RESPONSE STATUS:',
-      deleteResponse.status()
-    );
 
     expect(
       deleteResponse.ok(),
       'Delete branch API request should succeed'
     ).toBeTruthy();
 
-    // -----------------------------------------------------
-    // Verify branch disappeared
-    // -----------------------------------------------------
-
     await expect(
       branchRow
     ).toBeHidden({
       timeout: 30000,
     });
-
-    console.log(
-      'Branch deleted from UI.'
-    );
   }
 }

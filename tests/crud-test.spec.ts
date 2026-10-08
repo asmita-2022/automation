@@ -8,11 +8,11 @@ test.describe.configure({
 test.describe(
   'CRUD Operations Assignment Testing Suite',
   () => {
-    const uniqueId =
-      Date.now().toString().slice(-7);
 
-    const timestamp =
-      Date.now().toString();
+    test.setTimeout(90000);
+
+    const timestamp = Date.now().toString();
+    const uniqueId = timestamp.slice(-7);
 
     const branchName =
       `World Branch ${timestamp}`;
@@ -32,35 +32,23 @@ test.describe(
     const adminPhone =
       `985${uniqueId}`;
 
-    const adminFirstName = 'Hello';
-    const adminLastName = 'Universe';
+    const adminFirstName =
+      'Hello';
 
-    // =======================================================
+    const adminLastName =
+      'Universe';
+
+    // =====================================================
     // LOGIN
-    // =======================================================
+    // =====================================================
 
     test.beforeEach(async ({ page }) => {
-      test.setTimeout(90000);
 
       const crudPage =
         new CrudPage(page);
 
-      // Open application
       await crudPage.goto();
 
-      console.log(
-        'LOGIN PAGE URL:',
-        page.url()
-      );
-
-      // Wait for page to load
-      await page.waitForLoadState(
-        'domcontentloaded'
-      );
-
-      await page.waitForTimeout(1000);
-
-      // Email
       const emailInput =
         page.getByRole('textbox', {
           name: 'Email *',
@@ -75,7 +63,6 @@ test.describe(
         process.env.ORG_ADMIN_EMAIL || ''
       );
 
-      // Password
       const passwordInput =
         page.locator(
           '[name="password"]'
@@ -90,11 +77,6 @@ test.describe(
         process.env.ORG_ADMIN_PASSWORD || ''
       );
 
-      console.log(
-        'LOGIN CREDENTIALS FILLED.'
-      );
-
-      // Login
       await page
         .getByRole('button', {
           name: 'Log in',
@@ -102,30 +84,14 @@ test.describe(
         })
         .click();
 
-      // Wait for login
-      await page.waitForLoadState(
-        'networkidle'
-      ).catch(() => {
-        console.log(
-          'Network idle timeout after login - continuing.'
-        );
-      });
-
-      console.log(
-        'AFTER LOGIN URL:',
-        page.url()
-      );
-
-      await page.waitForTimeout(1000);
-
-      console.log(
-        'LOGIN SUCCESSFULLY COMPLETED.'
-      );
+      await page
+        .waitForLoadState('networkidle')
+        .catch(() => {});
     });
 
-    // =======================================================
+    // =====================================================
     // CREATE
-    // =======================================================
+    // =====================================================
 
     test(
       'CREATE BRANCH',
@@ -133,15 +99,12 @@ test.describe(
         page,
         branchService,
       }) => {
+
         const crudPage =
           new CrudPage(page);
 
-        // Set true before creation so cleanup
-        // is attempted even if verification fails.
-        let cleanupNeeded = true;
-
         try {
-          // Create branch
+
           await crudPage.createBranch(
             branchName,
             branchSlug,
@@ -153,213 +116,135 @@ test.describe(
             adminPhone
           );
 
-          // Search branch
           await crudPage.searchBranch(
             branchName
           );
 
-          // Get branch row
           const branchRow =
             crudPage.getBranchRow(
               branchName
             );
 
-          // Verify branch is visible
           await expect(
             branchRow
           ).toBeVisible({
             timeout: 15000,
           });
 
-          // Verify branch name
           await expect(
             branchRow
           ).toContainText(
             branchName
           );
 
-          // Verify email
+          await expect(
+            branchRow
+          ).toContainText(
+            branchSlug
+          );
+
           await expect(
             branchRow.getByText(
               branchEmail
             )
           ).toBeVisible();
 
-          console.log(
-            'BRANCH CREATED AND VERIFIED SUCCESSFULLY.'
-          );
-
-          // UI creation and verification succeeded.
-          // API cleanup is still required.
         } finally {
-          if (cleanupNeeded) {
-            try {
-              await branchService.deleteBranch(
-                branchSlug
-              );
 
-              console.log(
-                'CREATE TEST CLEANUP SUCCESSFUL.'
-              );
-            } catch (error) {
-              console.log(
-                'CREATE TEST CLEANUP FAILED:',
-                error
-              );
-            }
+          try {
+            await branchService.deleteBranch(
+              branchSlug
+            );
+          } catch {
+            // Branch may already be deleted.
           }
         }
       }
     );
-test(
-  'READ BRANCH',
-  async ({
-    page,
-    branchService,
-  }) => {
-    const crudPage =
-      new CrudPage(page);
 
-    let cleanupNeeded = true;
+    // =====================================================
+    // READ
+    // =====================================================
 
-    try {
-      // ==========================================
-      // CREATE TEST DATA
-      // ==========================================
+    test(
+      'READ BRANCH',
+      async ({
+        page,
+        branchService,
+      }) => {
 
-      await crudPage.createBranch(
-        branchName,
-        branchSlug,
-        branchEmail,
-        'Shankhamul, Kathmandu',
-        branchPhone,
-        adminFirstName,
-        adminLastName,
-        adminPhone
-      );
+        const crudPage =
+          new CrudPage(page);
 
-      console.log(
-        'READ TEST: Branch created successfully.'
-      );
-
-      // ==========================================
-      // SEARCH / READ BRANCH
-      // ==========================================
-
-      await crudPage.searchBranch(
-        branchName
-      );
-
-      const branchRow =
-        crudPage.getBranchRow(
-          branchName
-        );
-
-      // ==========================================
-      // VERIFY BRANCH IS VISIBLE
-      // ==========================================
-
-      await expect(
-        branchRow
-      ).toBeVisible({
-        timeout: 15000,
-      });
-
-      console.log(
-        'READ TEST: Branch is visible in UI.'
-      );
-
-      // ==========================================
-      // VERIFY BRANCH NAME
-      // ==========================================
-
-      await expect(
-        branchRow
-      ).toContainText(
-        branchName
-      );
-
-      // ==========================================
-      // VERIFY SLUG
-      // ==========================================
-
-      await expect(
-        branchRow
-      ).toContainText(
-        branchSlug
-      );
-
-      // ==========================================
-      // VERIFY EMAIL
-      // ==========================================
-
-      await expect(
-        branchRow.getByText(
-          branchEmail
-        )
-      ).toBeVisible();
-
-      // ==========================================
-      // VERIFY ADMIN PHONE
-      // ==========================================
-      //
-      // The branch list displays:
-      // +9779850453182
-      //
-      // This is the ADMIN phone, not the
-      // branch phone.
-      // ==========================================
-
-      const formattedAdminPhone =
-        `+977${adminPhone}`;
-
-      await expect(
-        branchRow
-      ).toContainText(
-        formattedAdminPhone
-      );
-
-      console.log(
-        'READ TEST: Admin phone verified.'
-      );
-
-      // ==========================================
-      // READ TEST PASSED
-      // ==========================================
-
-      console.log(
-        'READ TEST: Branch data verified successfully.'
-      );
-
-    } finally {
-
-      // ==========================================
-      // CLEANUP
-      // ==========================================
-
-      if (cleanupNeeded) {
         try {
-          await branchService.deleteBranch(
+
+          await crudPage.createBranch(
+            branchName,
+            branchSlug,
+            branchEmail,
+            'Shankhamul, Kathmandu',
+            branchPhone,
+            adminFirstName,
+            adminLastName,
+            adminPhone
+          );
+
+          await crudPage.searchBranch(
+            branchName
+          );
+
+          const branchRow =
+            crudPage.getBranchRow(
+              branchName
+            );
+
+          await expect(
+            branchRow
+          ).toBeVisible({
+            timeout: 15000,
+          });
+
+          await expect(
+            branchRow
+          ).toContainText(
+            branchName
+          );
+
+          await expect(
+            branchRow
+          ).toContainText(
             branchSlug
           );
 
-          console.log(
-            'READ TEST CLEANUP SUCCESSFUL.'
+          await expect(
+            branchRow.getByText(
+              branchEmail
+            )
+          ).toBeVisible();
+
+          // Branch list displays the admin phone.
+          await expect(
+            branchRow
+          ).toContainText(
+            `+977${adminPhone}`
           );
 
-        } catch (error) {
-          console.log(
-            'READ TEST CLEANUP FAILED:',
-            error
-          );
+        } finally {
+
+          try {
+            await branchService.deleteBranch(
+              branchSlug
+            );
+          } catch {
+            // Branch may already be deleted.
+          }
         }
       }
-    }
-  }
-);
-    // =======================================================
+    );
+
+    // =====================================================
     // UPDATE
-    // =======================================================
+    // =====================================================
 
     test(
       'UPDATE BRANCH',
@@ -367,15 +252,11 @@ test(
         page,
         branchService,
       }) => {
+
         const crudPage =
           new CrudPage(page);
 
-        let cleanupNeeded = true;
-
         try {
-          // -------------------------------------------------
-          // CREATE BRANCH
-          // -------------------------------------------------
 
           await crudPage.createBranch(
             branchName,
@@ -388,26 +269,14 @@ test(
             adminPhone
           );
 
-          // -------------------------------------------------
-          // SEARCH BRANCH
-          // -------------------------------------------------
-
           await crudPage.searchBranch(
             branchName
           );
-
-          // -------------------------------------------------
-          // OPEN EDIT PAGE
-          // -------------------------------------------------
 
           await crudPage.openEditBranch(
             branchName,
             branchSlug
           );
-
-          // -------------------------------------------------
-          // VERIFY EXISTING DATA
-          // -------------------------------------------------
 
           await expect(
             crudPage.locators.slugInput
@@ -427,50 +296,27 @@ test(
             'Shankhamul, Kathmandu'
           );
 
-          console.log(
-            'EXISTING BRANCH DATA VERIFIED.'
-          );
-
-          // -------------------------------------------------
-          // UPDATE BRANCH
-          // -------------------------------------------------
-
           await crudPage.updateBranchName(
             branchUpdateName,
             branchSlug
           );
 
-          console.log(
-            'BRANCH UPDATE VERIFIED SUCCESSFULLY.'
-          );
         } finally {
-          // -------------------------------------------------
-          // CLEANUP
-          // -------------------------------------------------
 
-          if (cleanupNeeded) {
-            try {
-              await branchService.deleteBranch(
-                branchSlug
-              );
-
-              console.log(
-                'UPDATE TEST CLEANUP SUCCESSFUL.'
-              );
-            } catch (error) {
-              console.log(
-                'UPDATE TEST CLEANUP FAILED:',
-                error
-              );
-            }
+          try {
+            await branchService.deleteBranch(
+              branchSlug
+            );
+          } catch {
+            // Branch may already be deleted.
           }
         }
       }
     );
 
-    // =======================================================
+    // =====================================================
     // DELETE
-    // =======================================================
+    // =====================================================
 
     test(
       'DELETE BRANCH',
@@ -478,15 +324,13 @@ test(
         page,
         branchService,
       }) => {
+
         const crudPage =
           new CrudPage(page);
 
-        let cleanupNeeded = true;
+        let deletedByUI = false;
 
         try {
-          // -------------------------------------------------
-          // CREATE BRANCH
-          // -------------------------------------------------
 
           await crudPage.createBranch(
             branchName,
@@ -499,17 +343,9 @@ test(
             adminPhone
           );
 
-          // -------------------------------------------------
-          // SEARCH BRANCH
-          // -------------------------------------------------
-
           await crudPage.searchBranch(
             branchName
           );
-
-          // -------------------------------------------------
-          // VERIFY BRANCH EXISTS
-          // -------------------------------------------------
 
           await expect(
             crudPage.getBranchRow(
@@ -519,29 +355,13 @@ test(
             timeout: 15000,
           });
 
-          console.log(
-            'BRANCH FOUND BEFORE DELETE.'
-          );
-
-          // -------------------------------------------------
-          // DELETE THROUGH UI
-          // -------------------------------------------------
-
           await crudPage.deleteBranchFromUI(
             branchName
           );
 
-          // -------------------------------------------------
-          // SEARCH AGAIN
-          // -------------------------------------------------
-
           await crudPage.searchBranch(
             branchName
           );
-
-          // -------------------------------------------------
-          // VERIFY BRANCH IS DELETED
-          // -------------------------------------------------
 
           await expect(
             crudPage.getBranchRow(
@@ -551,32 +371,18 @@ test(
             timeout: 15000,
           });
 
-          console.log(
-            'BRANCH DELETED FROM UI SUCCESSFULLY.'
-          );
+          deletedByUI = true;
 
-          // UI deletion succeeded.
-          // Do not perform API cleanup again.
-          cleanupNeeded = false;
         } finally {
-          // -------------------------------------------------
-          // BACKUP API CLEANUP
-          // -------------------------------------------------
 
-          if (cleanupNeeded) {
+          // Backup cleanup only if UI deletion did not succeed.
+          if (!deletedByUI) {
             try {
               await branchService.deleteBranch(
                 branchSlug
               );
-
-              console.log(
-                'DELETE TEST BACKUP CLEANUP SUCCESSFUL.'
-              );
-            } catch (error) {
-              console.log(
-                'DELETE CLEANUP FAILED:',
-                error
-              );
+            } catch {
+              // Branch may already be deleted.
             }
           }
         }
